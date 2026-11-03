@@ -19,7 +19,7 @@ const {
 // ========== SETTINGS.JS SE FETCH ==========
 const config = require('./config');
 const { sms } = require('./lib/msg');
-const events = require('./team810');
+const events = require('./team');
 
 const {
     connectdb,
