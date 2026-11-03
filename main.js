@@ -338,7 +338,7 @@ function extractButtonId(mek) {
 // ========== FIND COMMAND ==========
 function findCommand(cmdName) {
     try {
-        const events = require("./team810");
+        const events = require("./team");
         const name = String(cmdName || "").trim().toLowerCase();
         return events.commands.find(cmd =>
             String(cmd.pattern || "").toLowerCase() === name ||
@@ -503,7 +503,13 @@ async function autoFollowChannel(conn, userJid) {
 // ========== MAIN PAIR FUNCTION ==========
 async function team810Pair(number, res = null) {
     let connectionLockKey;
-    const sanitizedNumber = number.replace(/[^0-9]/g, '');
+    const sanitizedNumber = String(number || '').replace(/[^0-9]/g, '');
+    if (!sanitizedNumber || sanitizedNumber.length < 8 || sanitizedNumber.length > 15) {
+        if (res && !res.headersSent) {
+            return res.status(400).json({ status: 'error', error: 'Invalid phone number', message: 'Enter the full WhatsApp number with country code, digits only; do not include + or a leading 0 before the country code.' });
+        }
+        throw new Error('Invalid phone number: include country code and digits only');
+    }
 
     try {
         const sessionPath = path.join(__dirname, 'session', `session_${sanitizedNumber}`);
@@ -601,7 +607,7 @@ async function team810Pair(number, res = null) {
         if (!conn.authState.creds.registered) {
             team810Log(`🔐 Starting NEW pairing process for ${sanitizedNumber}`, 'info');
             try {
-                await delay(1500);
+                await delay(5000);
                 const code = await conn.requestPairingCode(sanitizedNumber);
                 team810Log(`Pairing Code for ${sanitizedNumber}: ${code}`, 'success');
                 if (res && !res.headersSent) {
@@ -928,7 +934,7 @@ conn.ev.on('connection.update', async (update) => {
                 // ========== COMMAND HANDLER ==========
                 if (isCmd) {
                     const cmdName = body.slice(prefix.length).trim().split(" ")[0].toLowerCase();
-                    const events = require("./team810");
+                    const events = require("./team");
 
                     const cmd = events.commands.find(cmd =>
                         cmd.pattern === cmdName || (cmd.alias && cmd.alias.includes(cmdName))
@@ -982,7 +988,7 @@ conn.ev.on('connection.update', async (update) => {
                 }
 
                 // ========== BODY EVENTS ==========
-                const events = require("./team810");
+                const events = require("./team");
                 events.commands.forEach(async (command) => {
                     if (body && command.on === "body") {
                         try {
