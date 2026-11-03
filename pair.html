@@ -430,12 +430,19 @@ async function getCode() {
             codeBox.style.color = "#fff";
             codeBox.innerText = data.code;
         } else {
+            codeBox.style.letterSpacing = "normal";
             codeBox.style.color = "#ff4d6d";
-            codeBox.innerText = data.message || data.error || (data.details ? String(data.details) : "PAIR CODE FAILED — TRY AGAIN");
+            const message = data.message || data.error || (data.status === "already_connected"
+                ? "NUMBER ALREADY CONNECTED"
+                : data.status === "connection_in_progress"
+                    ? "CONNECTION IN PROGRESS — WAIT AND RETRY"
+                    : "PAIR CODE NOT AVAILABLE — CHECK SERVER LOGS");
+            codeBox.innerText = String(message).slice(0, 180);
         }
     } catch (e) {
+        codeBox.style.letterSpacing = "normal";
         codeBox.style.color = "#ff4d6d";
-        codeBox.innerText = "CONNECTION FAILED — CHECK SERVER LOGS";
+        codeBox.innerText = "SERVER CONNECTION FAILED — CHECK RENDER LOGS";
     }
 }
 
